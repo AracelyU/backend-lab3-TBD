@@ -28,4 +28,6 @@ public interface UserRepository {
     List<Map<String, Object>> usersParticipation(long id_task);
 
     List<Map<String, Object>> getParticipationByTask(long id_task);
+
+    List<Map<String, Object>> getVolunteersByEmergency(long id_emergency);
 }

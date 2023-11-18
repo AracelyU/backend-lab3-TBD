@@ -197,4 +197,31 @@ public class UserService implements UserRepository {
         }
     }
 
+    @Override
+    public List<Map<String, Object>> getVolunteersByEmergency(long id_emergency){
+        try (Connection conn = sql2o.open()) {
+            String sql = "SELECT u.id_user, p.first_name, p.first_lastname, ua.longitude, ua.latitude ,ua.geom " +
+                    "FROM public.user u, public.profile p, public.user_address ua, public.user_request ur, " +
+                    "     public.request r, public.task_request tr, public.task t, " +
+                    "     public.emergency_task et, public.emergency e " +
+                    "WHERE u.id_profile = p.id_profile " +
+                    "AND ua.id_address_u = u.id_address_u " +
+                    "AND u.id_user = ur.id_user " +
+                    "AND ur.id_request = r.id_request " +
+                    "AND r.id_request = tr.id_request " +
+                    "AND tr.id_task = t.id_task " +
+                    "AND t.id_task = et.id_task " +
+                    "AND et.id_emergency = e.id_emergency " +
+                    "AND e.id_emergency = :id_emergency";
+            List<Map<String, Object>> results = conn.createQuery(sql)
+                    .addParameter("id_emergency", id_emergency)
+                    .executeAndFetchTable()
+                    .asList();
+            return results;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
 }

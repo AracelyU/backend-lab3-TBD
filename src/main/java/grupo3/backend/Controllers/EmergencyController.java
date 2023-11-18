@@ -1,15 +1,12 @@
 package grupo3.backend.Controllers;
 
 import grupo3.backend.Entities.EmergencyEntity;
-import grupo3.backend.Entities.TaskEntity;
 import grupo3.backend.Services.EmergencyService;
-import grupo3.backend.Services.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -59,4 +56,7 @@ public class EmergencyController {
     public List<Map<String, Object>> getStateNames(){
         return emergencyService.getEmergencies_nameState();
     }
+
+    @GetMapping("/getEmergenciesAddresses")
+    public List<Map<String, Object>> getEmergenciesAddresses() { return emergencyService.getEmergenciesAddresses(); }
 }

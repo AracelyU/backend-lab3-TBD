@@ -36,6 +36,21 @@ public class EmergencyService implements EmergencyRepository {
     }
 
     @Override
+    public List<Map<String, Object>> getEmergenciesAddresses() {
+        try (Connection conn = sql2o.open()) {
+            String sql = "SELECT e.id_emergency, e.emergency_name, ea.longitude, ea.latitude , ea.geom" +
+                    " FROM public.emergency_address ea, public.emergency e" +
+                    " WHERE e.id_address_e = ea.id_address_e";
+            return conn.createQuery(sql)
+                    .executeAndFetchTable()
+                    .asList();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
     public List<EmergencyEntity> getEmergencyById(long id_emergency){
         try(Connection conn = sql2o.open()) {
             // String sql = "SELECT * FROM taskStatus where idStatus=:id";

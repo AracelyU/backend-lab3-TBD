@@ -79,4 +79,7 @@ public class UserController {
         return userService.delete_User(id);
     }
 
+    @GetMapping("/getVolunteers/{id_emergency}")
+    public List<Map<String, Object>> getVolunteersByEmergency(@PathVariable Integer id_emergency) { return userService.getVolunteersByEmergency(id_emergency); }
+
 }
