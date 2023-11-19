@@ -4,11 +4,14 @@ package grupo3.backend.repositories;
 import grupo3.backend.Entities.UserAddressEntity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserAddressRepository {
-    List<UserAddressEntity> getAllUserAddress();
+    List<Map<String, Object>> getAllUserAddress();
 
-    List<UserAddressEntity> getUserAddressById(long id_user_address);
+    List<Map<String, Object>> getUserAddressById(long id_user_address);
+
+    void setGeom_user();
 
     long createUserAddress(UserAddressEntity userAddressEntity);
 

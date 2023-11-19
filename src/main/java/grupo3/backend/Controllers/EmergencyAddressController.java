@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+
 @RestController
 @CrossOrigin
 @RequestMapping("/emergencyAddress")
@@ -16,12 +18,12 @@ public class EmergencyAddressController {
     EmergencyAddressService emergencyAddressService;
 
     @GetMapping("/get")
-    public List<EmergencyAddressEntity> getAll(){
+    public List<Map<String, Object>> getAll(){
         return emergencyAddressService.getAllEmergencyAddress();
     }
 
     @GetMapping("/get/{id}")
-    public List<EmergencyAddressEntity> getById(@PathVariable long id) {
+    public List<Map<String, Object>> getById(@PathVariable long id) {
         return emergencyAddressService.getEmergencyAddressById(id);
     }
 
@@ -29,7 +31,7 @@ public class EmergencyAddressController {
     @ResponseBody
     public ResponseEntity<EmergencyAddressEntity> save(@RequestBody EmergencyAddressEntity emergencyAddressEntity){
         long idGenerado = emergencyAddressService.createEmergencyAddress(emergencyAddressEntity);
-        emergencyAddressEntity.setId_emergency_address(idGenerado);
+        emergencyAddressEntity.setId_address_e(idGenerado);
         return ResponseEntity.status(HttpStatus.CREATED).body(emergencyAddressEntity);
     }
 

@@ -1,5 +1,6 @@
 package grupo3.backend.Entities;
 
+import org.hibernate.annotations.Type;
 import org.locationtech.jts.geom.Point;
 
 public class EmergencyAddressEntity {
@@ -17,11 +18,11 @@ public class EmergencyAddressEntity {
         this.address = address;
     }
 
-    public long getId_emergency_address() {
+    public long getId_address_e() {
         return id_address_e;
     }
 
-    public void setId_emergency_address(long id_emergency_address) {
+    public void setId_address_e(long id_emergency_address) {
         this.id_address_e = id_emergency_address;
     }
 
