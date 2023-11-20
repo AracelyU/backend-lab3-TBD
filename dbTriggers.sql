@@ -59,6 +59,85 @@ ON public.ability
 FOR EACH ROW
 EXECUTE FUNCTION log_query_ability();
 
+-- Crear una función que registre las operaciones en la tabla "emergency_address"
+CREATE OR REPLACE FUNCTION log_query_emergency_address()
+RETURNS TRIGGER AS $$
+DECLARE
+  username TEXT;
+  table_name VARCHAR(25);
+  query_text TEXT;
+  operation TEXT;
+BEGIN
+
+  -- obtener id de usuario y nombre de la tabla
+  SELECT user_id::TEXT INTO username FROM login_identification LIMIT 1;
+  table_name := 'emergency_address';
+
+  -- Obtener la operación realizada y construir la consulta
+  IF (TG_OP = 'INSERT') THEN
+    query_text := 'INSERT';
+    operation := 'INSERT INTO ' || TG_TABLE_NAME || ' (id_address_e, address, longitude, latitude, geom) VALUES (' || NEW.id_address_e || ', ' || quote_literal(NEW.address) || ', ' || NEW.longitude || ', ' || NEW.latitude || ', ST_AsText(NEW.geom))';
+  ELSIF (TG_OP = 'UPDATE') THEN
+    query_text := 'UPDATE';
+    operation := 'UPDATE ' || TG_TABLE_NAME || ' SET address = ' || quote_literal(NEW.address) || ', longitude = ' || NEW.longitude || ', latitude = ' || NEW.latitude || ', geom = ST_AsText(NEW.geom) WHERE id_address_e = ' || NEW.id_address_e;
+  ELSIF (TG_OP = 'DELETE') THEN
+    query_text := 'DELETE';
+    operation := 'DELETE FROM ' || TG_TABLE_NAME || ' WHERE id_address_e = ' || OLD.id_address_e;
+  END IF;
+
+  -- Insertar el registro en la tabla "query_log"
+  INSERT INTO query_log (username, table_name, query_text, operation) VALUES (username, table_name, query_text, operation);
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear el trigger que se dispara después de INSERT, UPDATE o DELETE en la tabla emergency_address
+CREATE TRIGGER log_query_emergency_address_trigger
+AFTER INSERT OR UPDATE OR DELETE
+ON public.emergency_address
+FOR EACH ROW
+EXECUTE FUNCTION log_query_emergency_address();
+
+-- Crear una función que registre las operaciones en la tabla user_address
+CREATE OR REPLACE FUNCTION log_query_user_address()
+RETURNS TRIGGER AS $$
+DECLARE
+  username TEXT;
+  table_name VARCHAR(25);
+  query_text TEXT;
+  operation TEXT;
+BEGIN
+
+  -- obtener id de usuario y nombre de la tabla
+  SELECT user_id::TEXT INTO username FROM login_identification LIMIT 1;
+  table_name := 'user_address';
+
+  -- Obtener la operación realizada y construir la consulta
+  IF (TG_OP = 'INSERT') THEN
+    query_text := 'INSERT';
+    operation := 'INSERT INTO ' || TG_TABLE_NAME || ' (id_address_u, address, longitude, latitude, geom) VALUES (' || NEW.id_address_u || ', ' || quote_literal(NEW.address) || ', ' || NEW.longitude || ', ' || NEW.latitude || ', ST_AsText(NEW.geom))';
+  ELSIF (TG_OP = 'UPDATE') THEN
+    query_text := 'UPDATE';
+    operation := 'UPDATE ' || TG_TABLE_NAME || ' SET address = ' || quote_literal(NEW.address) || ', longitude = ' || NEW.longitude || ', latitude = ' || NEW.latitude || ', geom = ST_AsText(NEW.geom) WHERE id_address_u = ' || NEW.id_address_u;
+  ELSIF (TG_OP = 'DELETE') THEN
+    query_text := 'DELETE';
+    operation := 'DELETE FROM ' || TG_TABLE_NAME || ' WHERE id_address_u = ' || OLD.id_address_u;
+  END IF;
+
+  -- Insertar el registro en la tabla "query_log"
+  INSERT INTO query_log (username, table_name, query_text, operation) VALUES (username, table_name, query_text, operation);
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear el trigger que se dispara después de INSERT, UPDATE o DELETE en la tabla user_address
+CREATE TRIGGER log_query_user_address_trigger
+AFTER INSERT OR UPDATE OR DELETE
+ON public.user_address
+FOR EACH ROW
+EXECUTE FUNCTION log_query_user_address();
 
 
 
@@ -75,18 +154,18 @@ BEGIN
     -- obtener id de usuario y nombre de la tabla
     SELECT user_id::TEXT INTO username FROM login_identification LIMIT 1;
     table_name := 'emergency';
-
-   -- Obtener la operación realizada y construir la consulta
-    IF (TG_OP = 'INSERT') THEN
-        query_text := 'INSERT';
-        operation := 'INSERT INTO ' || TG_TABLE_NAME || ' (id_emergency, emergency_name, emergency_location, emergency_type, statement_date, id_state) VALUES (' || NEW.id_emergency || ', ' || quote_literal(NEW.emergency_name) || ', ' || quote_literal(NEW.emergency_location) || ', ' || quote_literal(NEW.emergency_type) || ', ' || quote_literal(NEW.statement_date) || ', ' || NEW.id_state || ')';
-    ELSIF (TG_OP = 'UPDATE') THEN
-        query_text := 'UPDATE';
-        operation := 'UPDATE ' || TG_TABLE_NAME || ' SET emergency_name = ' || quote_literal(NEW.emergency_name) || ', emergency_location = ' || quote_literal(NEW.emergency_location) || ', emergency_type = ' || quote_literal(NEW.emergency_type) || ', statement_date = ' || quote_literal(NEW.statement_date) || ', id_state = ' || NEW.id_state || ' WHERE id_emergency = ' || NEW.id_emergency;
-    ELSIF (TG_OP = 'DELETE') THEN
-        query_text := 'DELETE';
-        operation := 'DELETE FROM ' || TG_TABLE_NAME || ' WHERE id_emergency = ' || OLD.id_emergency;
-    END IF;
+	
+    -- Obtener la operación realizada y construir la consulta
+  	IF (TG_OP = 'INSERT') THEN
+    	query_text := 'INSERT';
+    	operation := 'INSERT INTO ' || TG_TABLE_NAME || ' (id_emergency, emergency_name, statement_date, emergency_type, id_state, id_address_e) VALUES (' || NEW.id_emergency || ', ' || quote_literal(NEW.emergency_name) || ', ' || TO_CHAR(NEW.statement_date, 'YYYY-MM-DD') || ', ' || NEW.emergency_type || ', ' || NEW.id_state || ', ' || NEW.id_address_e || ')';
+  	ELSIF (TG_OP = 'UPDATE') THEN
+    	query_text := 'UPDATE';
+    	operation := 'UPDATE ' || TG_TABLE_NAME || ' SET emergency_name = ' || quote_literal(NEW.emergency_name) || ', statement_date = ' || TO_CHAR(NEW.statement_date, 'YYYY-MM-DD') || ', emergency_type = ' || NEW.emergency_type || ', id_state = ' || NEW.id_state || ', id_address_e = ' || NEW.id_address_e || ' WHERE id_emergency = ' || NEW.id_emergency;
+  	ELSIF (TG_OP = 'DELETE') THEN
+    	query_text := 'DELETE';
+    	operation := 'DELETE FROM ' || TG_TABLE_NAME || ' WHERE id_emergency = ' || OLD.id_emergency;
+  	END IF;
 
     -- Insertar el registro en la tabla query_log 
     INSERT INTO query_log (username, table_name, query_text, operation) VALUES (username, table_name, query_text, operation);
@@ -288,16 +367,16 @@ BEGIN
     table_name := 'profile';
 
     -- Obtener la operación realizada y construir la consulta
-	IF (TG_OP = 'INSERT') THEN
-        query_text := 'INSERT';
-        operation := 'INSERT INTO ' || TG_TABLE_NAME || ' (id_profile, photo, first_name, second_name, first_lastname, second_lastname, description, gender, birthday) VALUES (' || NEW.id_profile || ', ' || quote_literal(NEW.photo) || ', ' || quote_literal(NEW.first_name) || ', ' || quote_literal(NEW.second_name) || ', ' || quote_literal(NEW.first_lastname) || ', ' || quote_literal(NEW.second_lastname) || ', ' || quote_literal(NEW.description) || ', ' || quote_literal(NEW.gender) || ', ' || quote_literal(NEW.birthday) || ')';
-    ELSIF (TG_OP = 'UPDATE') THEN
-        query_text := 'UPDATE';
-        operation := 'UPDATE ' || TG_TABLE_NAME || ' SET photo = ' || quote_literal(NEW.photo) || ', first_name = ' || quote_literal(NEW.first_name) || ', second_name = ' || quote_literal(NEW.second_name) || ', first_lastname = ' || quote_literal(NEW.first_lastname) || ', second_lastname = ' || quote_literal(NEW.second_lastname) || ', description = ' || quote_literal(NEW.description) || ', gender = ' || quote_literal(NEW.gender) || ', birthday = ' || quote_literal(NEW.birthday) || ' WHERE id_profile = ' || NEW.id_profile;
-    ELSIF (TG_OP = 'DELETE') THEN
-        query_text := 'DELETE';
-        operation := 'DELETE FROM ' || TG_TABLE_NAME || ' WHERE id_profile = ' || OLD.id_profile;
-    END IF;
+  	IF (TG_OP = 'INSERT') THEN
+    	query_text := 'INSERT';
+    	operation := 'INSERT INTO ' || TG_TABLE_NAME || ' (id_profile, photo, rut, first_name, second_name, first_lastname, second_lastname, description, gender, birthday) VALUES (' || NEW.id_profile || ', ' || quote_literal(NEW.photo) || ', ' || quote_literal(NEW.rut) || ', ' || quote_literal(NEW.first_name) || ', ' || quote_literal(NEW.second_name) || ', ' || quote_literal(NEW.first_lastname) || ', ' || quote_literal(NEW.second_lastname) || ', ' || quote_literal(NEW.description) || ', ' || quote_literal(NEW.gender) || ', ' || TO_CHAR(NEW.birthday, 'YYYY-MM-DD') || ')';
+  	ELSIF (TG_OP = 'UPDATE') THEN
+    	query_text := 'UPDATE';
+    	operation := 'UPDATE ' || TG_TABLE_NAME || ' SET photo = ' || quote_literal(NEW.photo) || ', rut = ' || quote_literal(NEW.rut) || ', first_name = ' || quote_literal(NEW.first_name) || ', second_name = ' || quote_literal(NEW.second_name) || ', first_lastname = ' || quote_literal(NEW.first_lastname) || ', second_lastname = ' || quote_literal(NEW.second_lastname) || ', description = ' || quote_literal(NEW.description) || ', gender = ' || quote_literal(NEW.gender) || ', birthday = ' || TO_CHAR(NEW.birthday, 'YYYY-MM-DD') || ' WHERE id_profile = ' || NEW.id_profile;
+  	ELSIF (TG_OP = 'DELETE') THEN
+    	query_text := 'DELETE';
+    	operation := 'DELETE FROM ' || TG_TABLE_NAME || ' WHERE id_profile = ' || OLD.id_profile;
+  	END IF;
 
     -- Insertar el registro en la tabla query_log usando la variable current_username, table_name y query_text
     INSERT INTO query_log (username, table_name, query_text, operation) VALUES (username, table_name, query_text, operation);
@@ -580,16 +659,16 @@ BEGIN
     table_name := 'user';
 
  	-- Obtener la operación realizada y construir la consulta
-    IF (TG_OP = 'INSERT') THEN
-        query_text := 'INSERT';
-        operation := 'INSERT INTO ' || TG_TABLE_NAME || ' (id_user, username, password, id_profile, id_role, id_institution) VALUES (' || NEW.id_user || ', ' || quote_literal(NEW.username) || ', ' || quote_literal(NEW.password) || ', ' || NEW.id_profile || ', ' || NEW.id_role || ', ' || NEW.id_institution || ')';
-    ELSIF (TG_OP = 'UPDATE') THEN
-        query_text := 'UPDATE';
-        operation := 'UPDATE ' || TG_TABLE_NAME || ' SET username = ' || quote_literal(NEW.username) || ', password = ' || quote_literal(NEW.password) || ', id_profile = ' || NEW.id_profile || ', id_role = ' || NEW.id_role || ', id_institution = ' || NEW.id_institution || ' WHERE id_user = ' || NEW.id_user;
-    ELSIF (TG_OP = 'DELETE') THEN
-        query_text := 'DELETE';
-        operation := 'DELETE FROM ' || TG_TABLE_NAME || ' WHERE id_user = ' || OLD.id_user;
-    END IF;
+	IF (TG_OP = 'INSERT') THEN
+    	query_text := 'INSERT';
+    	operation := 'INSERT INTO ' || TG_TABLE_NAME || ' (id_user, username, password, id_profile, id_role, id_institution, id_address_u) VALUES (' || NEW.id_user || ', ' || quote_literal(NEW.username) || ', ' || quote_literal(NEW.password) || ', ' || NEW.id_profile || ', ' || NEW.id_role || ', ' || NEW.id_institution || ', ' || NEW.id_address_u || ')';
+  	ELSIF (TG_OP = 'UPDATE') THEN
+    	query_text := 'UPDATE';
+    	operation := 'UPDATE ' || TG_TABLE_NAME || ' SET username = ' || quote_literal(NEW.username) || ', password = ' || quote_literal(NEW.password) || ', id_profile = ' || NEW.id_profile || ', id_role = ' || NEW.id_role || ', id_institution = ' || NEW.id_institution || ', id_address_u = ' || NEW.id_address_u || ' WHERE id_user = ' || NEW.id_user;
+  	ELSIF (TG_OP = 'DELETE') THEN
+    	query_text := 'DELETE';
+    	operation := 'DELETE FROM ' || TG_TABLE_NAME || ' WHERE id_user = ' || OLD.id_user;
+  	END IF;
 
     -- Insertar el registro en la tabla query_log usando la variable current_username, table_name y query_text
     INSERT INTO query_log (username, table_name, query_text, operation) VALUES (username, table_name, query_text, operation);
