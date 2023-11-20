@@ -1,8 +1,8 @@
-# Instrucción configuración Laboratorio n°1 – TBD
+# Instrucción configuración Laboratorio n°2 – TBD
 Para comenzar la configuración se requiere realizar un pull al repositorio https://github.com/Mieres7/Frontend_dbd2_grupo3/.
 
 Configurar el backend:
-1.	Crear una base de datos en pgAdmin (PostgreSQL) con el nombre “TBD_Lab1”.
+1.	Crear una base de datos en pgAdmin (PostgreSQL) con el nombre “TBD_Lab2”.
 2.	Utilizar la herramienta de Query, copiar el código “dbCreate” desde el repositorio y ejecutarlo.
 3.	Utilizar la herramienta de Query, copiar el código “dbLoad” desde el repositorio y ejecutarlo.
 4.	Utilizar la herramienta de Query, copiar el código “dbTriggers” desde el repositorio y ejecutarlo.
