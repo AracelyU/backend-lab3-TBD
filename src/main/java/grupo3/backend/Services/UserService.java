@@ -212,7 +212,7 @@ public class UserService implements UserRepository {
                     "AND tr.id_task = t.id_task " +
                     "AND t.id_task = et.id_task " +
                     "AND et.id_emergency = e.id_emergency " +
-                    "AND e.id_emergency = :id_emergency";
+                    "AND e.id_emergency = :id_emergency AND u.id_role = 3 ";
             List<Map<String, Object>> results = conn.createQuery(sql)
                     .addParameter("id_emergency", id_emergency)
                     .executeAndFetchTable()
