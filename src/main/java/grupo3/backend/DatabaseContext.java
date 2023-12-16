@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.sql2o.Sql2o;
 
 @Configuration
-public class databaseContext {
+public class DatabaseContext {
     @Value("${database.url}")
     private String dbURL;
 
