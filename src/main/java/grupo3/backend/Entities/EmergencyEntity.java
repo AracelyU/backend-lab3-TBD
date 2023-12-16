@@ -5,15 +5,6 @@ import java.util.Date;
 
 public class EmergencyEntity {
 
-    /*CREATE TABLE IF NOT EXISTS public.emergency(
-    id_emergency SERIAL PRIMARY KEY,
-    emergency_name TEXT COLLATE pg_catalog."default",
-    emergency_location TEXT COLLATE pg_catalog."default",
-    statement_date DATE,   <- lo coloque como LocalDate
-    id_state INTEGER);
-
-     */
-
     private long id_emergency;
 
     private String emergency_name;
