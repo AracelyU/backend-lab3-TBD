@@ -3,74 +3,73 @@ package grupo3.backend.repositoriesMongo;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import grupo3.backend.EntitiesMongo.EmergencyMongo;
 import grupo3.backend.EntitiesMongo.EmergencyTaskMongo;
 import grupo3.backend.EntitiesMongo.TaskMongo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.LookupOperation;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
-import org.bson.Document;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 @Repository
 public class TaskMongoRepositoryImg implements TaskMongoRepository {
 
+
     @Autowired
-    MongoDatabase database;
-
-
-    /*
-    La función getActiveTasksForEmergency del repositorio TaskMongoRepositoryImg en el código que proporcionaste se utiliza para obtener una lista de tareas activas asociadas a una emergencia específica en una base de datos MongoDB. He aquí un desglose de lo que hace:
-
-1. Dependencias:
-
-Importa las clases necesarias para conectarse a la base de datos MongoDB, trabajar con documentos y colecciones, y mapear entidades a clases POJO.
-Inyecta la base de datos MongoDB database usando @Autowired.
-2. Método getActiveTasksForEmergency:
-
-Toma la emergencyId como parámetro.
-Obtiene las colecciones task y emergencyTask de la base de datos.
-Crea una lista de documentos pipeline para definir la agregación:
-Etapa de match: Filtra los documentos de emergencyTask por id_emergency igual al emergencyId proporcionado.
-Etapa de lookup: Realiza una unión entre las colecciones emergencyTask y task en base a los campos id_task (campo común). El resultado es un array de documentos de la colección task dentro de cada documento de emergencyTask.
-Etapa de unwind: Desestructura el array de documentos de task creado por la etapa anterior, generando un documento por cada tarea dentro de cada documento de emergencyTask.
-Etapa de match: Filtra los documentos de task restantes por id_state igual a 2 (suponiendo que 2 representa el estado "activo").
-Ejecuta la agregación en la colección emergencyTask utilizando la lista pipeline y asigna el resultado a una variable result.
-Convierte el resultado de la agregación a una lista de objetos TaskMongo y la devuelve.
-En resumen, esta función realiza una consulta compleja en MongoDB para recuperar una lista de tareas activas para una emergencia específica, utilizando etapas de agregación para filtrar, unir y procesar los datos de las colecciones involucradas.
-     */
-
+    private MongoTemplate mongoTemplate;
 
     @Override
-    public List<TaskMongo> getActiveTasksForEmergency(long emergencyId) {
-        MongoCollection<TaskMongo> taskCollection = database.getCollection("task", TaskMongo.class);
-        MongoCollection<EmergencyTaskMongo> emergencyTaskCollection = database.getCollection("emergencyTask", EmergencyTaskMongo.class);
+    public List<TaskMongo> getActiveTasksForEmergency(long idEmergency) {
 
-        List<Document> pipeline = new ArrayList<>();
+        // Verificar que el id_emergency tenga un id_state igual a 2 en EmergencyMongo
+        EmergencyMongo emergency = mongoTemplate.findOne(
+                Query.query(Criteria.where("id_emergency").is(idEmergency).and("id_state").is(2)),
+                EmergencyMongo.class
+        );
 
-        // Match stage to filter EmergencyTaskMongo by id_emergency
-        Document matchEmergencyTaskStage = new Document("$match", new Document("id_emergency", emergencyId));
-        pipeline.add(matchEmergencyTaskStage);
+        // Si no se encuentra una EmergencyMongo válida, retornar una lista vacía
+        if (emergency == null) {
+            return null;
+        }
 
-        // Lookup stage to join EmergencyTaskMongo with TaskMongo
-        Document lookupStage = new Document("$lookup", new Document()
-                .append("from", "task")
-                .append("localField", "id_task")
-                .append("foreignField", "id_task")
-                .append("as", "tasks"));
-        pipeline.add(lookupStage);
+        // Continuar con la búsqueda de tareas
 
-        // Unwind stage to destructure the array created by $lookup
-        Document unwindStage = new Document("$unwind", "$tasks");
-        pipeline.add(unwindStage);
+        // Definir la operación de lookup
+        LookupOperation lookup = LookupOperation.newLookup()
+                .from("task")
+                .localField("id_task")
+                .foreignField("id_task")
+                .as("tasks");
 
-        // Match stage to filter tasks with id_state: 2 (assuming 2 is the active state)
-        Document matchActiveTaskStage = new Document("$match", new Document("tasks.id_state", 2));
-        pipeline.add(matchActiveTaskStage);
+        // Agregar la etapa de match para filtrar por id_emergency
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("id_emergency").is(idEmergency)),
+                lookup
+        );
 
-        AggregateIterable<TaskMongo> result = emergencyTaskCollection.aggregate(pipeline, TaskMongo.class);
+        // Ejecutar la agregación y obtener el resultado
+        List<EmergencyTaskMongo> emergencyTasks = mongoTemplate.aggregate(aggregation, "emergency_task", EmergencyTaskMongo.class).getMappedResults();
 
-        return result.into(new ArrayList<>());
+        // Obtener la lista de id_task asociados al emergencyID
+        List<Long> taskIds = emergencyTasks.stream()
+                .map(EmergencyTaskMongo::getId_task)
+                .collect(Collectors.toList());
+
+        // Filtrar las tareas de TaskMongo por los id_task obtenidos y por id_state en TaskMongo
+        List<TaskMongo> result = mongoTemplate.find(
+                Query.query(Criteria.where("id_task").in(taskIds).and("id_state").is(2)),
+                TaskMongo.class
+        );
+
+        return result;
     }
 }
+
+

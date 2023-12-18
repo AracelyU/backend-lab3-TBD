@@ -26,17 +26,5 @@ public class DatabaseContext {
     @Bean
     public Sql2o sql2o() { return new Sql2o(dbURL, dbUSER, dbPASS); }
 
-    @Bean
-    MongoDatabase database(){
-        //Configuracion de codec para parsear POJO
-        CodecRegistry defaultCodecRegistry = MongoClientSettings.getDefaultCodecRegistry();
-        CodecRegistry fromProvider = CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build());
-        CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(defaultCodecRegistry, fromProvider);
-
-        //Cliente de base de datos
-        MongoClient mongoClient =  MongoClients.create();
-        MongoDatabase database = mongoClient.getDatabase("TBD_Lab3").withCodecRegistry(pojoCodecRegistry);
-        return database;
-    }
 }
 

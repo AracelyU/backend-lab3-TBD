@@ -7,7 +7,7 @@ import grupo3.backend.repositories.UserAddressRepository;
 import grupo3.backend.repositories.UserRepository;
 import grupo3.backend.Entities.UserEntity;
 import grupo3.backend.Jwt.JwtService;
-import grupo3.backend.Triggers.triggerService;
+//import grupo3.backend.Triggers.triggerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,7 +26,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final triggerService triggerService;
+    //private final triggerService triggerService;
     private final UserAddressRepository userAddressRepository;
 
     public AuthResponse login(LoginRequest request) {
@@ -35,7 +35,7 @@ public class AuthService {
 
         Integer user_id = userRepository.findByUsername(request.getUsername()).stream().findFirst().orElseThrow().getId_user();
 
-        triggerService.updateUserInLoginIdentification(user_id);
+        //triggerService.updateUserInLoginIdentification(user_id);
 
         String token = jwtService.getToken(user);
         return AuthResponse.builder()
@@ -73,7 +73,7 @@ public class AuthService {
 
         Integer user_id = userRepository.findByUsername(request.getUsername()).stream().findFirst().orElseThrow().getId_user();
 
-        triggerService.updateUserInLoginIdentification(user_id);
+        //triggerService.updateUserInLoginIdentification(user_id);
 
         return AuthResponse.builder()
                 .token(jwtService.getToken(user))
