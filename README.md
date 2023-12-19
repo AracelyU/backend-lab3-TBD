@@ -2,7 +2,7 @@
 
 Para poder realizar la consulta solicitada en mongodb debe iniciar el proyecto backend. Asegurandose primero de crear una base de datos en pgAdmin (PostgreSQL) con el nombre “TBD_Lab2” y poblar la base de datos ejecutando las querys dbCreate.sql y dbLoad.sql, así como crear y poblar la base de datos que de mongodb según lo indicado en https://github.com/AracelyU/lab3_TBD_grupo3
 
-Luego en Postman tras autenticar la sesión (*) , se coloca como método POST la url localhost:8080/taskMongo/tareasActivas/idEmergencia, con idEmergencia un numero entero positivo
+Luego en Postman tras autenticar la sesión (*) , se coloca como método GET la url localhost:8080/taskMongo/tareasActivas/idEmergencia, con idEmergencia un numero entero positivo
 
 (*) Para autenticar sesión en Postman se tiene que hacer una petición POST con la url localhost:8080/auth/login con un body JSON
 
