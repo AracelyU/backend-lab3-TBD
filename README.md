@@ -4,7 +4,7 @@ Para poder realizar la consulta solicitada en mongodb,
 
 Debe iniciar el proyecto backend. Asegurandose de crear una base de datos en pgAdmin (PostgreSQL) con el nombre “TBD_Lab2” y crear y poblar la base de datos que de mongodb según lo indicado en https://github.com/AracelyU/lab3_TBD_grupo3
 
-Luego en Postman tras autenticar la sesión, se coloca como método POST coloca localhost:8080/taskMongo/tareasActivas/idEmergencia, con idEmergencia un numero entero positivo
+Luego en Postman tras autenticar la sesión, se coloca como método POST la url localhost:8080/taskMongo/tareasActivas/idEmergencia, con idEmergencia un numero entero positivo
 
 Consideraciones de implementación
 1. Las sesiones de usuario duran 24 minutos. Pasado ese tiempo deberá volver a iniciar sesión.
